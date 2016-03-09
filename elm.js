@@ -11702,7 +11702,7 @@ Elm.Display.make = function (_elm) {
    $Window = Elm.Window.make(_elm);
    var _op = {};
    var pixelOffset = function (b_size) {    var _p0 = b_size;switch (_p0.ctor) {case "Small": return 60.0;case "Medium": return 30.0;default: return 20.0;}};
-   var getTickHelper = function (b_size) {    var _p1 = b_size;switch (_p1.ctor) {case "Small": return 15;case "Medium": return 20;default: return 30;}};
+   var getTickHelper = function (b_size) {    var _p1 = b_size;switch (_p1.ctor) {case "Small": return 12;case "Medium": return 16;default: return 28;}};
    var getTick = F2(function (b_size,level) {
       var size = $Basics.toFloat(getTickHelper(b_size));
       var _p2 = level;
