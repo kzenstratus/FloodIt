@@ -1,0 +1,47 @@
+h1{
+    display:flex;
+    flex:1;
+    justify-content: center;
+    font: "Helvetica Neue";
+}
+.container {
+
+    display:flex;
+    flex-direction: row;
+    justify-content: center;
+    height: 100%;
+    width:100%; 
+}
+.board{
+    display:flex;
+    justify-content: center;
+    height: 50%;
+    width:100%; 
+}
+
+.gamePlay{
+    display:flex;
+    margin-top: 7%;
+    justify-content: center;
+}
+.panel{
+
+}
+.settings{
+    padding-top: 10%;
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.results{
+    display:flex;
+    justify-content: center;
+
+}
+.subresults{
+    display:flex;
+}
+.finished{
+    display: flex;
+    justify-content: center;
+}

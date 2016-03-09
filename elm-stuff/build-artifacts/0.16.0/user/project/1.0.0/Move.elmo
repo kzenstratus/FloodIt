@@ -1,0 +1,149 @@
+Elm.Move = Elm.Move || {};
+Elm.Move.make = function (_elm) {
+   "use strict";
+   _elm.Move = _elm.Move || {};
+   if (_elm.Move.values) return _elm.Move.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Array = Elm.Array.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Board = Elm.Board.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var didWinHelper = F3(function (size,color,pixels) {
+      didWinHelper: while (true) if (_U.cmp(size,0) > -1) {
+            var _p0 = $Array.toList(pixels);
+            if (_p0.ctor === "[]") {
+                  return true;
+               } else {
+                  if (!_U.eq(color,_p0._0.shade)) return false; else {
+                        var _v1 = size - 1,_v2 = color,_v3 = $Array.fromList(_p0._1);
+                        size = _v1;
+                        color = _v2;
+                        pixels = _v3;
+                        continue didWinHelper;
+                     }
+               }
+         } else return true;
+   });
+   var insert = F2(function (pix,b) {
+      var row = A2($Board.arrayGet,pix.loc.y,b);
+      var newRow = A3($Array.set,pix.loc.x,pix,row);
+      return A3($Array.set,pix.loc.y,newRow,b);
+   });
+   var pntToPix = F2(function (b,pnt) {    return A2($Board.arrayGet,pnt.x,A2($Board.arrayGet,pnt.y,b));});
+   var trimCoord = F5(function (baseColor,size,pixel,possible,b) {
+      trimCoord: while (true) {
+         var _p1 = possible;
+         if (_p1.ctor === "[]") {
+               return _U.list([]);
+            } else {
+               var _p3 = _p1._1;
+               var _p2 = _p1._0;
+               if (_U.eq(_p2,pixel.loc)) {
+                     var _v5 = baseColor,_v6 = size,_v7 = pixel,_v8 = _p3,_v9 = b;
+                     baseColor = _v5;
+                     size = _v6;
+                     pixel = _v7;
+                     possible = _v8;
+                     b = _v9;
+                     continue trimCoord;
+                  } else if (_U.cmp(_p2.x,size) > -1 || (_U.cmp(_p2.x,0) < 0 || (_U.cmp(_p2.y,size) > -1 || _U.cmp(_p2.y,0) < 0))) {
+                        var _v10 = baseColor,_v11 = size,_v12 = pixel,_v13 = _p3,_v14 = b;
+                        baseColor = _v10;
+                        size = _v11;
+                        pixel = _v12;
+                        possible = _v13;
+                        b = _v14;
+                        continue trimCoord;
+                     } else {
+                        var currPix = A2(pntToPix,b,_p2);
+                        if (!_U.eq(currPix.shade,baseColor)) {
+                              var _v15 = baseColor,_v16 = size,_v17 = pixel,_v18 = _p3,_v19 = b;
+                              baseColor = _v15;
+                              size = _v16;
+                              pixel = _v17;
+                              possible = _v18;
+                              b = _v19;
+                              continue trimCoord;
+                           } else return A2($List._op["::"],currPix,A5(trimCoord,baseColor,size,pixel,_p3,b));
+                     }
+            }
+      }
+   });
+   var scan = F5(function (baseColor,size,parent,pixel,b) {
+      var left = {x: pixel.loc.x - 1,y: pixel.loc.y};
+      var right = {x: pixel.loc.x + 1,y: pixel.loc.y};
+      var down = {x: pixel.loc.x,y: pixel.loc.y - 1};
+      var up = {x: pixel.loc.x,y: pixel.loc.y + 1};
+      var total = _U.list([up,down,right,left]);
+      return A5(trimCoord,baseColor,size,parent,total,b);
+   });
+   var traverse = F5(function (baseColor,newColor,parent,curr,b) {
+      var newPix = {shade: newColor,loc: curr};
+      var newB = A2(insert,newPix,b);
+      var currPix = A2(pntToPix,b,curr);
+      var parPix = A2(pntToPix,b,parent);
+      var size = $Array.length(b);
+      var next = A5(scan,baseColor,size,parPix,currPix,b);
+      var _p4 = next;
+      if (_p4.ctor === "[]") {
+            return newB;
+         } else {
+            return A5(traverseHelper,baseColor,newColor,curr,_p4,newB);
+         }
+   });
+   var traverseHelper = F5(function (baseColor,newColor,parent,currL,b) {
+      traverseHelper: while (true) {
+         var _p5 = currL;
+         if (_p5.ctor === "[]") {
+               return b;
+            } else {
+               var _p6 = _p5._0;
+               var newB = A5(traverse,baseColor,newColor,parent,_p6.loc,b);
+               var _v22 = baseColor,_v23 = newColor,_v24 = _p6.loc,_v25 = _p5._1,_v26 = newB;
+               baseColor = _v22;
+               newColor = _v23;
+               parent = _v24;
+               currL = _v25;
+               b = _v26;
+               continue traverseHelper;
+            }
+      }
+   });
+   var floodFill = F2(function (newColor,b) {
+      var start = {x: 0,y: 0};
+      var baseColor$ = A2(pntToPix,b,start);
+      var baseColor = baseColor$.shade;
+      return A5(traverse,baseColor,newColor,start,start,b);
+   });
+   var currColor = function (b) {    var pixel = A2($Board.arrayGet,0,A2($Board.arrayGet,0,b));return pixel.shade;};
+   var didWin = function (b) {
+      var size = $Array.length(b) - 1;
+      var c = currColor(b);
+      var iterate = F2(function (b2,negIndex) {
+         iterate: while (true) if (_U.cmp(negIndex,0) > 0) if (A3(didWinHelper,size,c,A2($Board.arrayGet,negIndex,b2))) {
+                  var _v27 = b2,_v28 = negIndex - 1;
+                  b2 = _v27;
+                  negIndex = _v28;
+                  continue iterate;
+               } else return false; else if (_U.eq(negIndex,0)) return A3(didWinHelper,size,c,A2($Board.arrayGet,negIndex,b2)) ? true : false;
+            else return _U.crash("Move",{start: {line: 117,column: 18},end: {line: 117,column: 29}})("shouldn\'t get to negative index");
+      });
+      return A2(iterate,b,size);
+   };
+   return _elm.Move.values = {_op: _op
+                             ,currColor: currColor
+                             ,trimCoord: trimCoord
+                             ,pntToPix: pntToPix
+                             ,scan: scan
+                             ,insert: insert
+                             ,traverseHelper: traverseHelper
+                             ,traverse: traverse
+                             ,floodFill: floodFill
+                             ,didWin: didWin
+                             ,didWinHelper: didWinHelper};
+};

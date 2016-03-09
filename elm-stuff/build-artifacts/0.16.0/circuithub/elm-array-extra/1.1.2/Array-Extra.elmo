@@ -1,0 +1,122 @@
+Elm.Array = Elm.Array || {};
+Elm.Array.Extra = Elm.Array.Extra || {};
+Elm.Array.Extra.make = function (_elm) {
+   "use strict";
+   _elm.Array = _elm.Array || {};
+   _elm.Array.Extra = _elm.Array.Extra || {};
+   if (_elm.Array.Extra.values) return _elm.Array.Extra.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Array = Elm.Array.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var splitAt = F2(function (index,xs) {
+      var len = $Array.length(xs);
+      var _p0 = {ctor: "_Tuple2",_0: _U.cmp(index,0) > 0,_1: _U.cmp(index,len) < 0};
+      if (_p0._0 === true) {
+            if (_p0._1 === true) {
+                  return {ctor: "_Tuple2",_0: A3($Array.slice,0,index,xs),_1: A3($Array.slice,index,len,xs)};
+               } else {
+                  return {ctor: "_Tuple2",_0: xs,_1: $Array.empty};
+               }
+         } else {
+            if (_p0._1 === true) {
+                  return {ctor: "_Tuple2",_0: $Array.empty,_1: xs};
+               } else {
+                  return {ctor: "_Tuple2",_0: $Array.empty,_1: $Array.empty};
+               }
+         }
+   });
+   var removeAt = F2(function (index,xs) {
+      var _p1 = A2(splitAt,index,xs);
+      var xs0 = _p1._0;
+      var xs1 = _p1._1;
+      var len1 = $Array.length(xs1);
+      return _U.eq(len1,0) ? xs0 : A2($Array.append,xs0,A3($Array.slice,1,len1,xs1));
+   });
+   var resizerIndexed = F3(function (n,f,xs) {
+      var gen = F2(function (m,g) {    return A2($Array.indexedMap,F2(function (i,_p2) {    return g(i);}),A2($Array.repeat,m,{ctor: "_Tuple0"}));});
+      var l = $Array.length(xs);
+      return _U.cmp(l,n) > 0 ? A3($Array.slice,l - n,l,xs) : _U.cmp(l,n) < 0 ? A2($Array.append,A2(gen,n - l,f),xs) : xs;
+   });
+   var resizelIndexed = F3(function (n,f,xs) {
+      var gen = F2(function (m,g) {    return A2($Array.indexedMap,F2(function (i,_p3) {    return g(i);}),A2($Array.repeat,m,{ctor: "_Tuple0"}));});
+      var l = $Array.length(xs);
+      return _U.cmp(l,n) > 0 ? A3($Array.slice,0,n,xs) : _U.cmp(l,n) < 0 ? A2($Array.append,
+      xs,
+      A2(gen,n - l,function (_p4) {    return f(function (i) {    return i + l;}(_p4));})) : xs;
+   });
+   var resizerRepeat = F3(function (n,val,xs) {
+      var l = $Array.length(xs);
+      return _U.cmp(l,n) > 0 ? A3($Array.slice,l - n,l,xs) : _U.cmp(l,n) < 0 ? A2($Array.append,A2($Array.repeat,n - l,val),xs) : xs;
+   });
+   var resizelRepeat = F3(function (n,val,xs) {
+      var l = $Array.length(xs);
+      return _U.cmp(l,n) > 0 ? A3($Array.slice,0,n,xs) : _U.cmp(l,n) < 0 ? A2($Array.append,xs,A2($Array.repeat,n - l,val)) : xs;
+   });
+   var filterMap = F2(function (f,xs) {
+      var maybePush = F3(function (f,mx,xs) {    var _p5 = f(mx);if (_p5.ctor === "Just") {    return A2($Array.push,_p5._0,xs);} else {    return xs;}});
+      return A3($Array.foldl,maybePush(f),$Array.empty,xs);
+   });
+   var getUnsafe = F2(function (n,xs) {
+      var _p6 = A2($Array.get,n,xs);
+      if (_p6.ctor === "Just") {
+            return _p6._0;
+         } else {
+            return _U.crashCase("Array.Extra",{start: {line: 68,column: 3},end: {line: 70,column: 128}},_p6)(A2($Basics._op["++"],
+            "Index ",
+            A2($Basics._op["++"],
+            $Basics.toString(n),
+            A2($Basics._op["++"]," of Array with length ",A2($Basics._op["++"],$Basics.toString($Array.length(xs))," is not reachable.")))));
+         }
+   });
+   var apply = F2(function (fs,xs) {
+      var l = A2($Basics.min,$Array.length(fs),$Array.length(xs));
+      var fs$ = A3($Array.slice,0,l,fs);
+      return A2($Array.indexedMap,F2(function (n,f) {    return f(A2(getUnsafe,n,xs));}),fs$);
+   });
+   var map2 = F2(function (f,ws) {    return apply(A2($Array.map,f,ws));});
+   var zip = map2(F2(function (v0,v1) {    return {ctor: "_Tuple2",_0: v0,_1: v1};}));
+   var map3 = F3(function (f,ws,xs) {    return apply(A3(map2,f,ws,xs));});
+   var zip3 = map3(F3(function (v0,v1,v2) {    return {ctor: "_Tuple3",_0: v0,_1: v1,_2: v2};}));
+   var map4 = F4(function (f,ws,xs,ys) {    return apply(A4(map3,f,ws,xs,ys));});
+   var zip4 = map4(F4(function (v0,v1,v2,v3) {    return {ctor: "_Tuple4",_0: v0,_1: v1,_2: v2,_3: v3};}));
+   var map5 = F5(function (f,ws,xs,ys,zs) {    return apply(A5(map4,f,ws,xs,ys,zs));});
+   var zip5 = map5(F5(function (v0,v1,v2,v3,v4) {    return {ctor: "_Tuple5",_0: v0,_1: v1,_2: v2,_3: v3,_4: v4};}));
+   var sliceUntil = F2(function (n,a) {    return _U.cmp(n,0) > -1 ? A3($Array.slice,0,n,a) : A3($Array.slice,0,$Array.length(a) + n,a);});
+   var sliceFrom = F2(function (n,a) {    return A3($Array.slice,n,$Array.length(a),a);});
+   var update = F3(function (n,f,a) {
+      var element = A2($Array.get,n,a);
+      var _p8 = element;
+      if (_p8.ctor === "Nothing") {
+            return a;
+         } else {
+            return A3($Array.set,n,f(_p8._0),a);
+         }
+   });
+   return _elm.Array.Extra.values = {_op: _op
+                                    ,update: update
+                                    ,sliceFrom: sliceFrom
+                                    ,sliceUntil: sliceUntil
+                                    ,getUnsafe: getUnsafe
+                                    ,filterMap: filterMap
+                                    ,apply: apply
+                                    ,map2: map2
+                                    ,map3: map3
+                                    ,map4: map4
+                                    ,map5: map5
+                                    ,zip: zip
+                                    ,zip3: zip3
+                                    ,zip4: zip4
+                                    ,zip5: zip5
+                                    ,resizelRepeat: resizelRepeat
+                                    ,resizerRepeat: resizerRepeat
+                                    ,resizelIndexed: resizelIndexed
+                                    ,resizerIndexed: resizerIndexed
+                                    ,splitAt: splitAt
+                                    ,removeAt: removeAt};
+};

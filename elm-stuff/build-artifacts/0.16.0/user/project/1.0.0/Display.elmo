@@ -1,0 +1,292 @@
+Elm.Display = Elm.Display || {};
+Elm.Display.make = function (_elm) {
+   "use strict";
+   _elm.Display = _elm.Display || {};
+   if (_elm.Display.values) return _elm.Display.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Array = Elm.Array.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Board = Elm.Board.make(_elm),
+   $Color = Elm.Color.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $FButtons = Elm.FButtons.make(_elm),
+   $Graphics$Collage = Elm.Graphics.Collage.make(_elm),
+   $Graphics$Element = Elm.Graphics.Element.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Html$Attributes = Elm.Html.Attributes.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Move = Elm.Move.make(_elm),
+   $Random = Elm.Random.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Text = Elm.Text.make(_elm),
+   $Time = Elm.Time.make(_elm),
+   $Window = Elm.Window.make(_elm);
+   var _op = {};
+   var pixelOffset = function (b_size) {    var _p0 = b_size;switch (_p0.ctor) {case "Small": return 60.0;case "Medium": return 30.0;default: return 20.0;}};
+   var getTickHelper = function (b_size) {    var _p1 = b_size;switch (_p1.ctor) {case "Small": return 15;case "Medium": return 20;default: return 30;}};
+   var getTick = F2(function (b_size,level) {
+      var size = $Basics.toFloat(getTickHelper(b_size));
+      var _p2 = level;
+      switch (_p2.ctor)
+      {case "Easy": return $Basics.floor(1.5 * size);
+         case "Med": return $Basics.floor(size);
+         default: return $Basics.floor(0.8 * size);}
+   });
+   var mkRavi = function (l) {    return $Graphics$Collage.toForm(A3($Graphics$Element.fittedImage,l,l,"ravi.png"));};
+   var toFormDot = F4(function (color_l,b_size,raviMode,pixel) {
+      var offset = $Basics.floor(pixelOffset(b_size));
+      var offsetF = $Basics.toFloat(offset);
+      var color = A2($Board.getColor,color_l,pixel.shade);
+      var sqPixel = function () {
+         var _p3 = {ctor: "_Tuple2",_0: raviMode,_1: pixel.shade};
+         if (_p3._0 === true && _p3._1 === 0) {
+               return mkRavi(offset);
+            } else {
+               return A2($Graphics$Collage.filled,color,$Graphics$Collage.square(offsetF));
+            }
+      }();
+      return A2($Graphics$Collage.move,
+      {ctor: "_Tuple2",_0: offsetF * $Basics.toFloat(pixel.loc.x) - 130,_1: offsetF * $Basics.toFloat(pixel.loc.y) - 110},
+      sqPixel);
+   });
+   var arrToForm = F4(function (pixels,color_l,b_size,raviMode) {    return A2($List.map,A3(toFormDot,color_l,b_size,raviMode),$Array.toList(pixels));});
+   var webBoard = F4(function (b,color_l,b_size,raviMode) {
+      var b_l = $Array.toList(b);
+      var _p4 = b_l;
+      if (_p4.ctor === "[]") {
+            return _U.list([]);
+         } else {
+            return A2($Basics._op["++"],A4(arrToForm,_p4._0,color_l,b_size,raviMode),A4(webBoard,$Array.fromList(_p4._1),color_l,b_size,raviMode));
+         }
+   });
+   var resultStyle = {typeface: _U.list(["Helvetica Neue","sans-serif"])
+                     ,height: $Maybe.Just(45)
+                     ,color: $Color.black
+                     ,bold: true
+                     ,italic: false
+                     ,line: $Maybe.Nothing};
+   var tickStyle = {typeface: _U.list(["Helvetica Neue","sans-serif"])
+                   ,height: $Maybe.Just(30)
+                   ,color: $Color.black
+                   ,bold: false
+                   ,italic: false
+                   ,line: $Maybe.Nothing};
+   var loseText = $Graphics$Element.centered(A2($Text.style,resultStyle,$Text.fromString("YOU LOSE!")));
+   var loseGif = A3($Graphics$Element.fittedImage,400,400,"lose.gif");
+   var winText = $Graphics$Element.centered(A2($Text.style,resultStyle,$Text.fromString("YOU WIN!")));
+   var winGif = A3($Graphics$Element.fittedImage,400,400,"win.gif");
+   var colorT = $Board.colorTheme;
+   var State = F7(function (a,b,c,d,e,f,g) {    return {board: a,tick: b,ravi: c,difficulty: d,b_size: e,reset: f,outcome: g};});
+   var Restart = function (a) {    return {ctor: "Restart",_0: a};};
+   var Area = function (a) {    return {ctor: "Area",_0: a};};
+   var Level = function (a) {    return {ctor: "Level",_0: a};};
+   var Change = {ctor: "Change"};
+   var Hue = function (a) {    return {ctor: "Hue",_0: a};};
+   var btnMailbox = $Signal.mailbox(Hue(0));
+   var smallBtn = A3($FButtons.btnMkr,A2($Signal.message,btnMailbox.address,Area($Board.Small)),false,"Small Board");
+   var psmallBtn = A3($FButtons.btnMkr,A2($Signal.message,btnMailbox.address,Area($Board.Small)),true,"Small Board");
+   var medBtn = A3($FButtons.btnMkr,A2($Signal.message,btnMailbox.address,Area($Board.Medium)),false,"Medium Board");
+   var pmedBtn = A3($FButtons.btnMkr,A2($Signal.message,btnMailbox.address,Area($Board.Medium)),true,"Medium Board");
+   var largeBtn = A3($FButtons.btnMkr,A2($Signal.message,btnMailbox.address,Area($Board.Large)),false,"Large Board");
+   var plargeBtn = A3($FButtons.btnMkr,A2($Signal.message,btnMailbox.address,Area($Board.Large)),true,"Large Board");
+   var setSizeBtns = function (pressed) {
+      var _p5 = pressed;
+      switch (_p5.ctor)
+      {case "Small": return _U.list([psmallBtn,medBtn,largeBtn]);
+         case "Medium": return _U.list([smallBtn,pmedBtn,largeBtn]);
+         default: return _U.list([smallBtn,medBtn,plargeBtn]);}
+   };
+   var easyBtn = A3($FButtons.btnMkr,A2($Signal.message,btnMailbox.address,Level($Board.Easy)),false,"Easy Game");
+   var peasyBtn = A3($FButtons.btnMkr,A2($Signal.message,btnMailbox.address,Level($Board.Easy)),true,"Easy Game");
+   var medLvLBtn = A3($FButtons.btnMkr,A2($Signal.message,btnMailbox.address,Level($Board.Med)),false,"Medium Game");
+   var pmedLvLBtn = A3($FButtons.btnMkr,A2($Signal.message,btnMailbox.address,Level($Board.Med)),true,"Medium Game");
+   var hardBtn = A3($FButtons.btnMkr,A2($Signal.message,btnMailbox.address,Level($Board.Hard)),false,"Hard Game");
+   var phardBtn = A3($FButtons.btnMkr,A2($Signal.message,btnMailbox.address,Level($Board.Hard)),true,"Hard Game");
+   var setLvlBtns = function (lvl) {
+      var _p6 = lvl;
+      switch (_p6.ctor)
+      {case "Easy": return _U.list([peasyBtn,medLvLBtn,hardBtn]);
+         case "Med": return _U.list([easyBtn,pmedLvLBtn,hardBtn]);
+         default: return _U.list([easyBtn,medLvLBtn,phardBtn]);}
+   };
+   var newGame = A3($FButtons.btnMkr,A2($Signal.message,btnMailbox.address,Restart(true)),false,"New Game");
+   var winAlert = A2($Graphics$Element.flow,
+   $Graphics$Element.down,
+   A2($Basics._op["++"],_U.list([winText]),A2($Basics._op["++"],_U.list([winGif]),_U.list([newGame]))));
+   var loseAlert = A2($Graphics$Element.flow,
+   $Graphics$Element.down,
+   A2($Basics._op["++"],_U.list([loseText]),A2($Basics._op["++"],_U.list([loseGif]),_U.list([newGame]))));
+   var btnZero = A2($FButtons.colorBtns,A2($Signal.message,btnMailbox.address,Hue(0)),colorT.red);
+   var btnOne = A2($FButtons.colorBtns,A2($Signal.message,btnMailbox.address,Hue(1)),colorT.yellow);
+   var btnTwo = A2($FButtons.colorBtns,A2($Signal.message,btnMailbox.address,Hue(2)),colorT.green);
+   var btnThree = A2($FButtons.colorBtns,A2($Signal.message,btnMailbox.address,Hue(3)),colorT.blue);
+   var btnFour = A2($FButtons.colorBtns,A2($Signal.message,btnMailbox.address,Hue(4)),colorT.orange);
+   var btnFive = A2($FButtons.colorBtns,A2($Signal.message,btnMailbox.address,Hue(5)),colorT.purple);
+   var btnRavi = $FButtons.raviColorBtns(A2($Signal.message,btnMailbox.address,Hue(0)));
+   var setCBtn = function (raviMode) {
+      var firstBtn = function () {    var _p7 = raviMode;if (_p7 === true) {    return btnRavi;} else {    return btnZero;}}();
+      return A2($Graphics$Element.flow,$Graphics$Element.right,_U.list([firstBtn,btnOne,btnTwo,btnThree,btnFour,btnFive]));
+   };
+   var Ravi = function (a) {    return {ctor: "Ravi",_0: a};};
+   var raviGame = A3($FButtons.btnMkr,A2($Signal.message,btnMailbox.address,Ravi(false)),true,"Ravi Mode");
+   var praviGame = A3($FButtons.btnMkr,A2($Signal.message,btnMailbox.address,Ravi(true)),false,"Ravi Mode");
+   var setRaviModeBtn = function (raviMode) {    var _p8 = raviMode;if (_p8 === true) {    return raviGame;} else {    return praviGame;}};
+   var view = F2(function (s,_p9) {
+      var _p10 = _p9;
+      var raviBtn = $Html.fromElement(setRaviModeBtn(s.ravi));
+      var board$ = A3($Graphics$Collage.collage,400,400,A4(webBoard,s.board,$Board.colorNum,s.b_size,s.ravi));
+      var board = $Html.fromElement(board$);
+      var cBtns$ = setCBtn(s.ravi);
+      var cBtns = $Html.fromElement(cBtns$);
+      var lvl = s.difficulty;
+      var lvlBtns$ = A2($Graphics$Element.flow,$Graphics$Element.down,setLvlBtns(lvl));
+      var lvlBtns = $Html.fromElement(lvlBtns$);
+      var b_size = s.b_size;
+      var sizeBtns$ = A2($Graphics$Element.flow,$Graphics$Element.down,setSizeBtns(b_size));
+      var sizeBtns = $Html.fromElement(sizeBtns$);
+      var counterF = $Graphics$Element.centered(A2($Text.style,tickStyle,$Text.fromString($Basics.toString(s.tick))));
+      var counterH = $Html.fromElement(counterF);
+      var _p11 = s.outcome;
+      switch (_p11.ctor)
+      {case "Win": return A2($Html.div,
+           _U.list([$Html$Attributes.$class("results")]),
+           _U.list([A2($Html.div,
+           _U.list([$Html$Attributes.id("leftPanel")]),
+           _U.list([A2($Html.div,_U.list([$Html$Attributes.$class("finished")]),_U.list([$Html.fromElement(winText)]))
+                   ,A2($Html.div,_U.list([$Html$Attributes.id("success")]),_U.list([$Html.fromElement(winGif)]))
+                   ,A2($Html.div,_U.list([$Html$Attributes.$class("finished")]),_U.list([$Html.fromElement(newGame)]))]))]));
+         case "Lose": return A2($Html.div,
+           _U.list([$Html$Attributes.$class("results")]),
+           _U.list([A2($Html.div,
+           _U.list([$Html$Attributes.id("leftPanel")]),
+           _U.list([A2($Html.div,_U.list([$Html$Attributes.$class("finished")]),_U.list([$Html.fromElement(loseText)]))
+                   ,A2($Html.div,_U.list([$Html$Attributes.id("success")]),_U.list([$Html.fromElement(loseGif)]))
+                   ,A2($Html.div,_U.list([$Html$Attributes.$class("finished")]),_U.list([$Html.fromElement(newGame)]))]))]));
+         default: return A2($Html.div,
+           _U.list([$Html$Attributes.$class("container")]),
+           _U.list([A2($Html.div,
+                   _U.list([$Html$Attributes.id("leftPanel")]),
+                   _U.list([A2($Html.div,_U.list([$Html$Attributes.$class("board")]),_U.list([board]))
+                           ,A2($Html.div,_U.list([$Html$Attributes.$class("gamePlay")]),_U.list([counterH]))
+                           ,A2($Html.div,_U.list([$Html$Attributes.$class("gamePlay")]),_U.list([cBtns]))]))
+                   ,A2($Html.div,
+                   _U.list([$Html$Attributes.id("rightPanel")]),
+                   _U.list([A2($Html.div,_U.list([$Html$Attributes.$class("settings")]),_U.list([sizeBtns,lvlBtns,raviBtn]))]))]));}
+   });
+   var Playing = {ctor: "Playing"};
+   var initState = {board: $Board.initBoard,tick: 25,ravi: false,difficulty: $Board.Med,b_size: $Board.Medium,reset: false,outcome: Playing};
+   var Lose = {ctor: "Lose"};
+   var Win = {ctor: "Win"};
+   var upstate = F2(function (_p12,s) {
+      var _p13 = _p12;
+      var seed = $Random.initialSeed($Basics.round($Time.inMilliseconds(_p13._0)));
+      var _p14 = _p13._1;
+      switch (_p14.ctor)
+      {case "Hue": var currBoard = A2($Move.floodFill,_p14._0,s.board);
+           var result = function () {
+              var _p15 = {ctor: "_Tuple3",_0: _U.eq(s.tick,1),_1: _U.cmp(s.tick,0) < 1,_2: $Move.didWin(currBoard)};
+              _v13_0: do {
+                 if (_p15._2 === false) {
+                       if (_p15._1 === true) {
+                             if (_p15._0 === true) {
+                                   break _v13_0;
+                                } else {
+                                   return Lose;
+                                }
+                          } else {
+                             if (_p15._0 === true) {
+                                   break _v13_0;
+                                } else {
+                                   return Playing;
+                                }
+                          }
+                    } else {
+                       if (_p15._1 === true) {
+                             return Lose;
+                          } else {
+                             return Win;
+                          }
+                    }
+              } while (false);
+              return Lose;
+           }();
+           var t = _U.cmp(s.tick,0) < 1 ? 0 : s.tick - 1;
+           return {board: currBoard,tick: t,ravi: s.ravi,difficulty: s.difficulty,b_size: s.b_size,reset: false,outcome: result};
+         case "Area": var _p16 = _p14._0;
+           var newBoard = A4($Board.createBoardWrap,0,_p16,seed,$Board.colorNum);
+           return {board: newBoard,tick: getTickHelper(_p16),ravi: s.ravi,difficulty: $Board.Med,b_size: _p16,reset: true,outcome: s.outcome};
+         case "Level": var _p17 = _p14._0;
+           var newBoard = A4($Board.createBoardWrap,0,s.b_size,seed,$Board.colorNum);
+           return {board: newBoard,tick: A2(getTick,s.b_size,_p17),ravi: s.ravi,difficulty: _p17,b_size: s.b_size,reset: true,outcome: s.outcome};
+         case "Restart": var t = A2(getTick,s.b_size,s.difficulty);
+           var newBoard = A4($Board.createBoardWrap,0,s.b_size,seed,$Board.colorNum);
+           return {board: newBoard,tick: t,ravi: s.ravi,difficulty: s.difficulty,b_size: s.b_size,reset: true,outcome: Playing};
+         case "Ravi": var t = A2(getTick,s.b_size,s.difficulty);
+           var newBoard = A4($Board.createBoardWrap,0,s.b_size,seed,$Board.colorNum);
+           return {board: newBoard,tick: t,ravi: _p14._0,difficulty: s.difficulty,b_size: s.b_size,reset: true,outcome: Playing};
+         default: return {board: s.board,tick: s.tick,ravi: s.ravi,difficulty: s.difficulty,b_size: s.b_size,reset: true,outcome: s.outcome};}
+   });
+   var stateOT = A3($Signal.foldp,upstate,initState,$Time.timestamp(btnMailbox.signal));
+   var main = A3($Signal.map2,view,stateOT,$Window.dimensions);
+   return _elm.Display.values = {_op: _op
+                                ,Win: Win
+                                ,Lose: Lose
+                                ,Playing: Playing
+                                ,Ravi: Ravi
+                                ,Hue: Hue
+                                ,Change: Change
+                                ,Level: Level
+                                ,Area: Area
+                                ,Restart: Restart
+                                ,State: State
+                                ,initState: initState
+                                ,btnMailbox: btnMailbox
+                                ,colorT: colorT
+                                ,btnZero: btnZero
+                                ,btnOne: btnOne
+                                ,btnTwo: btnTwo
+                                ,btnThree: btnThree
+                                ,btnFour: btnFour
+                                ,btnFive: btnFive
+                                ,btnRavi: btnRavi
+                                ,smallBtn: smallBtn
+                                ,psmallBtn: psmallBtn
+                                ,medBtn: medBtn
+                                ,pmedBtn: pmedBtn
+                                ,largeBtn: largeBtn
+                                ,plargeBtn: plargeBtn
+                                ,easyBtn: easyBtn
+                                ,peasyBtn: peasyBtn
+                                ,medLvLBtn: medLvLBtn
+                                ,pmedLvLBtn: pmedLvLBtn
+                                ,hardBtn: hardBtn
+                                ,phardBtn: phardBtn
+                                ,newGame: newGame
+                                ,raviGame: raviGame
+                                ,praviGame: praviGame
+                                ,winGif: winGif
+                                ,winText: winText
+                                ,loseGif: loseGif
+                                ,loseText: loseText
+                                ,winAlert: winAlert
+                                ,loseAlert: loseAlert
+                                ,tickStyle: tickStyle
+                                ,resultStyle: resultStyle
+                                ,mkRavi: mkRavi
+                                ,getTickHelper: getTickHelper
+                                ,getTick: getTick
+                                ,upstate: upstate
+                                ,stateOT: stateOT
+                                ,pixelOffset: pixelOffset
+                                ,toFormDot: toFormDot
+                                ,arrToForm: arrToForm
+                                ,webBoard: webBoard
+                                ,setSizeBtns: setSizeBtns
+                                ,setLvlBtns: setLvlBtns
+                                ,setRaviModeBtn: setRaviModeBtn
+                                ,setCBtn: setCBtn
+                                ,view: view
+                                ,main: main};
+};

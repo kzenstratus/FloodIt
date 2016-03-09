@@ -1,0 +1,61 @@
+Elm.FButtons = Elm.FButtons || {};
+Elm.FButtons.make = function (_elm) {
+   "use strict";
+   _elm.FButtons = _elm.FButtons || {};
+   if (_elm.FButtons.values) return _elm.FButtons.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Board = Elm.Board.make(_elm),
+   $Color = Elm.Color.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Graphics$Collage = Elm.Graphics.Collage.make(_elm),
+   $Graphics$Element = Elm.Graphics.Element.make(_elm),
+   $Graphics$Input = Elm.Graphics.Input.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Text = Elm.Text.make(_elm);
+   var _op = {};
+   var mkBtn = F2(function (c,t) {
+      var h = 60;
+      var w = 200;
+      return A3($Graphics$Collage.collage,
+      w,
+      h,
+      _U.list([A2($Graphics$Collage.filled,c,A2($Graphics$Collage.rect,w,h))
+              ,$Graphics$Collage.toForm($Graphics$Element.centered(A2($Text.height,30,$Text.fromString(t))))]));
+   });
+   var mkRaviBtn = function (deg) {
+      var h = 40;
+      var w = 40;
+      var ravi = $Graphics$Collage.toForm(A3($Graphics$Element.fittedImage,w,h,"ravi.png"));
+      return A3($Graphics$Collage.collage,w,h,_U.list([A2($Graphics$Collage.rotate,$Basics.degrees(deg),ravi)]));
+   };
+   var raviColorBtns = function (sig) {    return A4($Graphics$Input.customButton,sig,mkRaviBtn(0),mkRaviBtn(30),mkRaviBtn(60));};
+   var mkCBtn = F2(function (btnCol,degRotate) {
+      var h = 40;
+      var w = 40;
+      return A3($Graphics$Collage.collage,
+      w,
+      h,
+      _U.list([A2($Graphics$Collage.rotate,$Basics.degrees(degRotate),A2($Graphics$Collage.filled,btnCol,A2($Graphics$Collage.rect,w,h)))]));
+   });
+   var colorBtns = F2(function (sig,c) {    return A4($Graphics$Input.customButton,sig,A2(mkCBtn,c,0),A2(mkCBtn,c,30),A2(mkCBtn,c,60));});
+   var colorT = $Board.colorTheme;
+   var btnMkr = F3(function (sig,pressed,str) {
+      return pressed ? A4($Graphics$Input.customButton,
+      sig,
+      A2(mkBtn,colorT.purple,str),
+      A2(mkBtn,colorT.green,str),
+      A2(mkBtn,colorT.orange,str)) : A4($Graphics$Input.customButton,sig,A2(mkBtn,colorT.orange,str),A2(mkBtn,colorT.green,str),A2(mkBtn,colorT.purple,str));
+   });
+   return _elm.FButtons.values = {_op: _op
+                                 ,colorT: colorT
+                                 ,mkCBtn: mkCBtn
+                                 ,colorBtns: colorBtns
+                                 ,mkRaviBtn: mkRaviBtn
+                                 ,raviColorBtns: raviColorBtns
+                                 ,mkBtn: mkBtn
+                                 ,btnMkr: btnMkr};
+};

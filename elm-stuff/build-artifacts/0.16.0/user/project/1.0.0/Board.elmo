@@ -1,0 +1,105 @@
+Elm.Board = Elm.Board || {};
+Elm.Board.make = function (_elm) {
+   "use strict";
+   _elm.Board = _elm.Board || {};
+   if (_elm.Board.values) return _elm.Board.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Array = Elm.Array.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Color = Elm.Color.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Random = Elm.Random.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var initSeed = $Random.initialSeed(6);
+   var boardSize = 10;
+   var start = 0;
+   var makeRows = F2(function (pnts,shades) {    return A3($List.map2,F2(function (color,coords) {    return {shade: color,loc: coords};}),shades,pnts);});
+   var makeCoords = F2(function (inX,inY) {    return {x: inY,y: inX};});
+   var oneValList = F3(function (counter,val,max) {
+      return _U.cmp(counter,max + 1) > -1 ? _U.list([]) : A2($List._op["::"],val,A3(oneValList,counter + 1,val,max));
+   });
+   var range = F2(function (num,max) {    return _U.cmp(num,max) > -1 ? _U.list([]) : A2($List._op["::"],num,A2(range,num + 1,max));});
+   var boardHelper = F4(function (index,size,seed,shadeArr) {
+      var col_list = A2(range,0,size);
+      var l_points = A2($List.map,makeCoords(index),col_list);
+      var color_size = $Array.length(shadeArr) - 1;
+      var rowNumTemp1 = A2($Random.list,size,A2($Random.$int,0,color_size));
+      var _p0 = A2($Random.generate,rowNumTemp1,seed);
+      var rowNumTemp2 = _p0._0;
+      var next_seed = _p0._1;
+      var rowNum = $Array.fromList(rowNumTemp2);
+      var pixels = $Array.fromList(A2(makeRows,l_points,rowNumTemp2));
+      return _U.eq(index,size) ? A2($List._op["::"],$Array.fromList(_U.list([])),_U.list([])) : A2($Basics._op["++"],
+      _U.list([pixels]),
+      A4(boardHelper,index + 1,size,next_seed,shadeArr));
+   });
+   var createBoard = F4(function (index,size,seed,shadeArr) {    return $Array.fromList(A2($List.take,size,A4(boardHelper,index,size,seed,shadeArr)));});
+   var createBoardWrap = F4(function (index,size,seed,shadeArr) {
+      var _p1 = size;
+      switch (_p1.ctor)
+      {case "Small": return A4(createBoard,index,5,seed,shadeArr);
+         case "Medium": return A4(createBoard,index,10,seed,shadeArr);
+         default: return A4(createBoard,index,15,seed,shadeArr);}
+   });
+   var arrayGet = F2(function (index,arr) {
+      var _p2 = A2($Array.get,index,arr);
+      if (_p2.ctor === "Nothing") {
+            return _U.crashCase("Board",{start: {line: 46,column: 5},end: {line: 48,column: 21}},_p2)("Error - Can\'t get color, out of bounds");
+         } else {
+            return _p2._0;
+         }
+   });
+   var getColor = F2(function (shadeArray,index) {    return A2(arrayGet,index,shadeArray);});
+   var colorTheme = {red: A4($Color.rgba,255,102,102,0.7)
+                    ,yellow: A4($Color.rgba,255,255,102,0.7)
+                    ,green: A4($Color.rgba,178,255,102,0.7)
+                    ,blue: A4($Color.rgba,102,255,255,0.7)
+                    ,orange: A4($Color.rgba,255,178,102,0.7)
+                    ,purple: A4($Color.rgba,102,102,255,0.7)};
+   var colorNum = $Array.fromList(_U.list([colorTheme.red,colorTheme.yellow,colorTheme.green,colorTheme.blue,colorTheme.orange,colorTheme.purple]));
+   var Large = {ctor: "Large"};
+   var Medium = {ctor: "Medium"};
+   var initBoard = A4(createBoardWrap,start,Medium,initSeed,colorNum);
+   var Small = {ctor: "Small"};
+   var Hard = {ctor: "Hard"};
+   var Med = {ctor: "Med"};
+   var Easy = {ctor: "Easy"};
+   var Pixel = F2(function (a,b) {    return {shade: a,loc: b};});
+   var Point = F2(function (a,b) {    return {x: a,y: b};});
+   var Node4 = F4(function (a,b,c,d) {    return {ctor: "Node4",_0: a,_1: b,_2: c,_3: d};});
+   var Node3 = F3(function (a,b,c) {    return {ctor: "Node3",_0: a,_1: b,_2: c};});
+   var Node2 = F2(function (a,b) {    return {ctor: "Node2",_0: a,_1: b};});
+   var Shades = F6(function (a,b,c,d,e,f) {    return {red: a,yellow: b,green: c,blue: d,orange: e,purple: f};});
+   return _elm.Board.values = {_op: _op
+                              ,Shades: Shades
+                              ,Node2: Node2
+                              ,Node3: Node3
+                              ,Node4: Node4
+                              ,Point: Point
+                              ,Pixel: Pixel
+                              ,Easy: Easy
+                              ,Med: Med
+                              ,Hard: Hard
+                              ,Small: Small
+                              ,Medium: Medium
+                              ,Large: Large
+                              ,colorTheme: colorTheme
+                              ,colorNum: colorNum
+                              ,arrayGet: arrayGet
+                              ,getColor: getColor
+                              ,range: range
+                              ,oneValList: oneValList
+                              ,makeCoords: makeCoords
+                              ,makeRows: makeRows
+                              ,boardHelper: boardHelper
+                              ,createBoard: createBoard
+                              ,createBoardWrap: createBoardWrap
+                              ,start: start
+                              ,boardSize: boardSize
+                              ,initSeed: initSeed
+                              ,initBoard: initBoard};
+};

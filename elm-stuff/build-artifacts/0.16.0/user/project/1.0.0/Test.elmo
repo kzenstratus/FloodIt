@@ -1,0 +1,52 @@
+Elm.Test = Elm.Test || {};
+Elm.Test.make = function (_elm) {
+   "use strict";
+   _elm.Test = _elm.Test || {};
+   if (_elm.Test.values) return _elm.Test.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Color = Elm.Color.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Graphics$Element = Elm.Graphics.Element.make(_elm),
+   $Graphics$Input = Elm.Graphics.Input.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Text = Elm.Text.make(_elm),
+   $Window = Elm.Window.make(_elm);
+   var _op = {};
+   var vspace = A2($Graphics$Element.spacer,0,10);
+   var upstate = F2(function (e,i) {    var _p0 = e;if (_p0.ctor === "Clear") {    return 0;} else {    return i + 1;}});
+   var initState = 0;
+   var Clear = {ctor: "Clear"};
+   var buttonMailbox = $Signal.mailbox(Clear);
+   var stateOverTime = A3($Signal.foldp,upstate,initState,buttonMailbox.signal);
+   var clearButton = A2($Graphics$Input.button,A2($Signal.message,buttonMailbox.address,Clear),"Clear");
+   var Inc = {ctor: "Inc"};
+   var incButton = A2($Graphics$Input.button,A2($Signal.message,buttonMailbox.address,Inc),"Increment");
+   var view = F2(function (i,_p1) {
+      var _p2 = _p1;
+      var caption = $Graphics$Element.leftAligned($Text.fromString($Basics.toString(i)));
+      return A2($Graphics$Element.color,
+      $Color.gray,
+      A4($Graphics$Element.container,
+      _p2._0,
+      _p2._1,
+      $Graphics$Element.middle,
+      A2($Graphics$Element.flow,$Graphics$Element.down,A2($List.intersperse,vspace,_U.list([caption,incButton,clearButton])))));
+   });
+   var main = A3($Signal.map2,view,stateOverTime,$Window.dimensions);
+   return _elm.Test.values = {_op: _op
+                             ,Inc: Inc
+                             ,Clear: Clear
+                             ,initState: initState
+                             ,upstate: upstate
+                             ,buttonMailbox: buttonMailbox
+                             ,incButton: incButton
+                             ,clearButton: clearButton
+                             ,vspace: vspace
+                             ,view: view
+                             ,stateOverTime: stateOverTime
+                             ,main: main};
+};

@@ -1,0 +1,31 @@
+Elm.Repl = Elm.Repl || {};
+Elm.Repl.make = function (_elm) {
+   "use strict";
+   _elm.Repl = _elm.Repl || {};
+   if (_elm.Repl.values) return _elm.Repl.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Board = Elm.Board.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Move = Elm.Move.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var tsol = {ctor: "_Tuple0"};
+   var a = A4($Board.createBoardWrap,0,$Board.Small,$Board.initSeed,$Board.colorNum);
+   var b = A2($Move.floodFill,0,a);
+   var c = A2($Move.floodFill,1,b);
+   var d = A2($Move.floodFill,4,c);
+   var aa = A2($Move.floodFill,3,d);
+   var aaa = A2($Move.floodFill,1,aa);
+   var bb = A2($Move.floodFill,5,aaa);
+   var cc = A2($Move.floodFill,0,bb);
+   var dd = A2($Move.floodFill,2,cc);
+   var ab = A2($Move.floodFill,4,dd);
+   var ac = A2($Move.floodFill,3,ab);
+   var ad = A2($Move.floodFill,2,ac);
+   var deltron3030 = $Move.didWin(ac);
+   return _elm.Repl.values = {_op: _op,a: a,aa: aa,aaa: aaa,ab: ab,ac: ac,ad: ad,b: b,bb: bb,c: c,cc: cc,d: d,dd: dd,deltron3030: deltron3030,tsol: tsol};
+};
