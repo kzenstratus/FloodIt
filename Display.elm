@@ -42,7 +42,7 @@ type alias State = {board : B.Board, tick: Int, ravi: Bool,
                    }
 
 initState: State
-initState = {board = B.initBoard, tick = 25, ravi = False, 
+initState = {board = B.initBoard, tick = 16, ravi = False, 
             difficulty = B.Med, b_size = B.Medium,
             reset = False, outcome = Playing
             }

@@ -176,7 +176,7 @@ Elm.Display.make = function (_elm) {
                    _U.list([A2($Html.div,_U.list([$Html$Attributes.$class("settings")]),_U.list([sizeBtns,lvlBtns,raviBtn]))]))]));}
    });
    var Playing = {ctor: "Playing"};
-   var initState = {board: $Board.initBoard,tick: 25,ravi: false,difficulty: $Board.Med,b_size: $Board.Medium,reset: false,outcome: Playing};
+   var initState = {board: $Board.initBoard,tick: 16,ravi: false,difficulty: $Board.Med,b_size: $Board.Medium,reset: false,outcome: Playing};
    var Lose = {ctor: "Lose"};
    var Win = {ctor: "Win"};
    var upstate = F2(function (_p12,s) {
