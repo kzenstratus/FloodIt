@@ -42,7 +42,7 @@ type alias State = {board : B.Board, tick: Int, ravi: Bool,
                    }
 
 initState: State
-initState = {board = B.initBoard, tick = 25, ravi = False, 
+initState = {board = B.initBoard, tick = 16, ravi = False, 
             difficulty = B.Med, b_size = B.Medium,
             reset = False, outcome = Playing
             }
@@ -176,9 +176,9 @@ mkRavi l = (E.fittedImage l l "ravi.png") |> C.toForm
 getTickHelper: B.BSize -> Int
 getTickHelper b_size = 
   case b_size of
-    B.Small  -> 15
-    B.Medium -> 20
-    B.Large  -> 30
+    B.Small  -> 12
+    B.Medium -> 16
+    B.Large  -> 28
 
 getTick: B.BSize -> B.Difficulty -> Int
 getTick b_size level = 
